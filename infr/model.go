@@ -10,13 +10,13 @@ type Beliefs [][2]float64
 // and the prior probability of bouncing off the first page and churning
 // at any subsequent page.
 type Model struct {
-	beliefs         Beliefs
+	Beliefs         Beliefs
 	pBounce, pChurn float64
 }
 
 // Method Init initializes the model.
 func (m *Model) Init(total int) {
-	m.beliefs = make(Beliefs, total)
+	m.Beliefs = make(Beliefs, total)
 
     // We set prior probabilities here so that they
     // can be re-used for resetting the beliefs:
@@ -31,28 +31,28 @@ func (m *Model) Init(total int) {
 
 // Method Prior resets the model to the prior beliefs.
 func (m *Model) Prior() {
-	m.beliefs[0][0], m.beliefs[0][1] = m.pBounce, 1.-m.pBounce
-	for i := 1; i != len(m.beliefs); i++ {
-		m.beliefs[i][0], m.beliefs[i][1] = m.pChurn, 1.-m.pChurn
+	m.Beliefs[0][0], m.Beliefs[0][1] = m.pBounce, 1.-m.pBounce
+	for i := 1; i != len(m.Beliefs); i++ {
+		m.Beliefs[i][0], m.Beliefs[i][1] = m.pChurn, 1.-m.pChurn
 	}
 }
 
 // Method Update updates the model with evidence.
 func (m *Model) Update(bandwidth float64, count int) {
-	for i := 0; i != len(m.beliefs); i++ {
+	for i := 0; i != len(m.Beliefs); i++ {
 		var j int // selects either alpha or beta
 		if i < count-1 {
 			j = 1
 		} else {
 			j = 0
 		}
-        m.beliefs[i][j] ++
+        m.Beliefs[i][j] ++
 		// if the evidence exceeds the bandwidth, scale down
-		evidence := m.beliefs[i][0] + m.beliefs[i][1]
+		evidence := m.Beliefs[i][0] + m.Beliefs[i][1]
 		if evidence > bandwidth {
 			scale := bandwidth / evidence
-			m.beliefs[i][0] *= scale
-			m.beliefs[i][1] *= scale
+			m.Beliefs[i][0] *= scale
+			m.Beliefs[i][1] *= scale
 		}
 		if j == 0 { // reached the last page of the session
 			break

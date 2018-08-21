@@ -1,7 +1,7 @@
 # Common shell commands
 
 # Git
-cd ~/go/src/bitbucket.org/dtolpin/pps; git commit -a -m 'cleaning up the code as I am reading Effective Go'
+cd ~/go/src/bitbucket.org/dtolpin/pps; git commit -a -m 'breathing, more tomorrow'
 cd ~/go/src/bitbucket.org/dtolpin/pps; git push
 cd ~/go/src/bitbucket.org/dtolpin/pps; git pull
 cd ~/go/src/bitbucket.org/dtolpin/pps; git status

@@ -23,15 +23,15 @@ func TestInit(t *testing.T) {
 		case len(c.beliefs) != c.total:
 			t.Errorf("wrong test: total=%d, len(beliefs)=%d",
 				c.total, len(c.beliefs))
-		case len(m.beliefs) != c.total:
-			t.Errorf("wrong length: total=%d, lem(m.beliefs)=%d",
-				c.total, len(m.beliefs))
+		case len(m.Beliefs) != c.total:
+			t.Errorf("wrong length: total=%d, lem(m.Beliefs)=%d",
+				c.total, len(m.Beliefs))
 		default:
 			for i := 0; i != c.total; i++ {
 				for j := 0; j != 2; j++ {
-					if m.beliefs[i][j] != c.beliefs[i][j] {
+					if m.Beliefs[i][j] != c.beliefs[i][j] {
 						t.Errorf("wrong belief (%d, %d): got %6g, want %6g",
-							i, j, m.beliefs[i][j], c.beliefs[i][j])
+							i, j, m.Beliefs[i][j], c.beliefs[i][j])
 					}
 				}
 			}
@@ -60,12 +60,12 @@ func TestPrior(t *testing.T) {
 	for _, total := range []int{1, 2, 5} {
 		m.Init(total)
 		m.Prior()
-		pBounce := m.beliefs[0][0] / (m.beliefs[0][0] + m.beliefs[0][1])
+		pBounce := m.Beliefs[0][0] / (m.Beliefs[0][0] + m.Beliefs[0][1])
 		if math.Abs(pBounce-m.pBounce) > epsilon {
 			t.Errorf("wrong prior bounce probability: got %6g, wanted %6g",
 				pBounce, m.pBounce)
 		}
-		for _, belief := range m.beliefs[1:] {
+		for _, belief := range m.Beliefs[1:] {
 			pChurn := belief[0] / (belief[0] + belief[1])
 			if math.Abs(pChurn-m.pChurn) > epsilon {
 				t.Errorf("wrong prior churn probability: got %6g, wanted %6g",
@@ -93,11 +93,11 @@ func TestUpdate(t *testing.T) {
         {8, Beliefs{{1, 4}, {1, 3}, {1, 2}, {0, 2}, {1, 1}}},
     } {
        m.Update(bandwidth, c.pps)
-       for i := 0; i != len(m.beliefs); i++ {
-           for j := 0; j != len(m.beliefs[i]); j++ {
-               if math.Abs(m.beliefs[i][j] - c.beliefs[i][j]) > epsilon {
+       for i := 0; i != len(m.Beliefs); i++ {
+           for j := 0; j != len(m.Beliefs[i]); j++ {
+               if math.Abs(m.Beliefs[i][j] - c.beliefs[i][j]) > epsilon {
                    t.Errorf("%d (bandwidth=%g): wrong belief [%d, %d]: wanted %4g, got %g",
-                       k, bandwidth, i, j, c.beliefs[i][j], m.beliefs[i][j])
+                       k, bandwidth, i, j, c.beliefs[i][j], m.Beliefs[i][j])
                }
            }
        }
@@ -117,11 +117,11 @@ func TestUpdate(t *testing.T) {
         {8, Beliefs{{1/3.375, 5.75/3.375}, {1/2.25, 3.5/2.25}, {1/1.5, 2/1.5}, {0, 2}, {1, 1}}},
     } {
        m.Update(bandwidth, c.pps)
-       for i := 0; i != len(m.beliefs); i++ {
-           for j := 0; j != len(m.beliefs[i]); j++ {
-               if math.Abs(m.beliefs[i][j] - c.beliefs[i][j]) > epsilon {
+       for i := 0; i != len(m.Beliefs); i++ {
+           for j := 0; j != len(m.Beliefs[i]); j++ {
+               if math.Abs(m.Beliefs[i][j] - c.beliefs[i][j]) > epsilon {
                    t.Errorf("%d (bandwidth=%g): wrong belief [%d, %d]: wanted %4g, got %g",
-                       k, bandwidth, i, j, c.beliefs[i][j], m.beliefs[i][j])
+                       k, bandwidth, i, j, c.beliefs[i][j], m.Beliefs[i][j])
                }
            }
        }
