@@ -38,19 +38,19 @@ func TestInit(t *testing.T) {
 		}
 
 		// check that the prior parameters are set properly
-		if m.PChurn > 1 {
-			t.Errorf("PChurn must be at most 1, got PChurn=%g", m.PChurn)
+		if m.pChurn > 1 {
+			t.Errorf("pChurn must be at most 1, got pChurn=%g", m.pChurn)
 		}
 
-		if m.PBounce > 1 {
-			t.Errorf("PBounce must be at most 1, got PBounce=%g", m.PBounce)
+		if m.pBounce > 1 {
+			t.Errorf("pBounce must be at most 1, got pBounce=%g", m.pBounce)
 		}
 
 		// check that the average length is half total
-		if c.total > 1 && math.Abs(2./m.PChurn-float64(c.total)) > 0.5 {
+		if c.total > 1 && math.Abs(2./m.pChurn-float64(c.total)) > 0.5 {
 			t.Errorf("average length must be half total, but got: "+
 				"total=%d, average=%6g",
-				c.total, 1./m.PChurn)
+				c.total, 1./m.pChurn)
 		}
 	}
 }
@@ -60,16 +60,16 @@ func TestPrior(t *testing.T) {
 	for _, total := range []int{1, 2, 5} {
 		m.Init(total)
 		m.Prior()
-		p_bounce := m.beliefs[0][0] / (m.beliefs[0][0] + m.beliefs[0][1])
-		if math.Abs(p_bounce-m.PBounce) > epsilon {
+		pBounce := m.beliefs[0][0] / (m.beliefs[0][0] + m.beliefs[0][1])
+		if math.Abs(pBounce-m.pBounce) > epsilon {
 			t.Errorf("wrong prior bounce probability: got %6g, wanted %6g",
-				p_bounce, m.PBounce)
+				pBounce, m.pBounce)
 		}
 		for _, belief := range m.beliefs[1:] {
-			p_churn := belief[0] / (belief[0] + belief[1])
-			if math.Abs(p_churn-m.PChurn) > epsilon {
+			pChurn := belief[0] / (belief[0] + belief[1])
+			if math.Abs(pChurn-m.pChurn) > epsilon {
 				t.Errorf("wrong prior churn probability: got %6g, wanted %6g",
-					p_churn, m.PChurn)
+					pChurn, m.pChurn)
 			}
 		}
 	}

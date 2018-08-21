@@ -6,29 +6,34 @@ package infr
 // a tuple per page.
 type Beliefs [][2]float64
 
+// Model is the model of a session. The fields are the current beliefs,
+// and the prior probability of bouncing off the first page and churning
+// at any subsequent page.
 type Model struct {
 	beliefs         Beliefs
-	PBounce, PChurn float64
+	pBounce, pChurn float64
 }
 
 // Method Init initializes the model.
 func (m *Model) Init(total int) {
 	m.beliefs = make(Beliefs, total)
-	// half the visitors bounce off the first page
-	m.PBounce = 0.5
 
-	// an average visitor views half the pages
-	m.PChurn = 2. / float64(total)
-	if m.PChurn > 1. {
-		m.PChurn = 1.
+    // We set prior probabilities here so that they
+    // can be re-used for resetting the beliefs:
+	//   * half the visitors bounce off the first page,
+	m.pBounce = 0.5
+	//   * an average visitor views half the pages.
+	m.pChurn = 2. / float64(total)
+	if m.pChurn > 1. {
+		m.pChurn = 1.
 	}
 }
 
 // Method Prior resets the model to the prior beliefs.
 func (m *Model) Prior() {
-	m.beliefs[0][0], m.beliefs[0][1] = m.PBounce, 1.-m.PBounce
+	m.beliefs[0][0], m.beliefs[0][1] = m.pBounce, 1.-m.pBounce
 	for i := 1; i != len(m.beliefs); i++ {
-		m.beliefs[i][0], m.beliefs[i][1] = m.PChurn, 1.-m.PChurn
+		m.beliefs[i][0], m.beliefs[i][1] = m.pChurn, 1.-m.pChurn
 	}
 }
 
