@@ -4,7 +4,7 @@ package infr
 
 // Beliefs is an array of alpha, beta parameters of Beta distribution,
 // a tuple per page.
-type Beliefs = [][2]float64
+type Beliefs [][2]float64
 
 type Model struct {
 	beliefs         Beliefs

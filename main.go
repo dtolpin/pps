@@ -17,12 +17,12 @@ func main() {
 	flag.Parse()
 	log.Printf("bandwidth=%v total=%v", *bandwidth, *total)
 
-	args := flag.Args()
-	if len(args) > 1 {
+	if flag.NArg() > 1 {
 		log.Fatalf("too many args, expected at most %v, got %v: %v",
-			maxargs, len(args), args)
+			maxargs, flag.NArg(), flag.Args())
 	}
 
 	var m infr.Model
 	m.Init(*total)
+    m.Prior()
 }
