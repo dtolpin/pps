@@ -36,11 +36,12 @@ func (m *Model) Prior() {
 func (m *Model) Update(bandwidth float64, count int) {
 	for i := 0; i != len(m.beliefs); i++ {
 		var j int // selects either alpha or beta
-		if i < len(m.beliefs) {
+		if i < count-1 {
 			j = 1
 		} else {
 			j = 0
 		}
+        m.beliefs[i][j] ++
 		// if the evidence exceeds the bandwidth, scale down
 		evidence := m.beliefs[i][0] + m.beliefs[i][1]
 		if evidence > bandwidth {

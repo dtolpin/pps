@@ -1,7 +1,7 @@
 # Common shell commands
 
 # Git
-cd ~/go/src/bitbucket.org/dtolpin/pps; git commit -a -m 'model drafted'
+cd ~/go/src/bitbucket.org/dtolpin/pps; git commit -a -m 'unit tests pass for model'
 cd ~/go/src/bitbucket.org/dtolpin/pps; git push
 cd ~/go/src/bitbucket.org/dtolpin/pps; git pull
 cd ~/go/src/bitbucket.org/dtolpin/pps; git status

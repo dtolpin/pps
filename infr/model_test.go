@@ -73,4 +73,29 @@ func TestPrior(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
+    var m Model
+    m.Init(5)
+    // we do not set prior beliefs here to simplify checking
+
+    // first check with bandwidth high enough to keep all evidence
+    for k, c := range []struct {
+        pps int
+        beliefs Beliefs
+    } {
+        {1, Beliefs{{1, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
+        {3, Beliefs{{1, 1}, {0, 1}, {1, 0}, {0, 0}, {0, 0}}},
+        {2, Beliefs{{1, 2}, {1, 1}, {1, 0}, {0, 0}, {0, 0}}},
+        {5, Beliefs{{1, 3}, {1, 2}, {1, 1}, {0, 1}, {1, 0}}},
+        {8, Beliefs{{1, 4}, {1, 3}, {1, 2}, {0, 2}, {1, 1}}},
+    } {
+       m.Update(/* bandwidth */ 1000, c.pps)
+       for i := 0; i != len(m.beliefs); i++ {
+           for j := 0; j != len(m.beliefs[i]); j++ {
+               if m.beliefs[i][j] != c.beliefs[i][j] {
+                   t.Errorf("%d: wrong belief [%d, %d]: wanted %4g, got %g",
+                       k, i, j, c.beliefs[i][j], m.beliefs[i][j])
+               }
+           }
+       }
+    }
 }
