@@ -53,8 +53,22 @@ func TestInit(t *testing.T) {
 }
 
 func TestPrior(t *testing.T) {
-	if false {
-		t.Errorf("failed")
+	var m Model
+	for _, total := range []int{1, 2, 5} {
+		m.Init(total)
+		m.Prior()
+		p_bounce := m.beliefs[0][0] / (m.beliefs[0][0] + m.beliefs[0][1])
+		if math.Abs(p_bounce-m.PBounce) > 1E-6 {
+			t.Errorf("wrong prior bounce probability: got %6g, wanted %6g",
+				p_bounce, m.PBounce)
+		}
+		for _, belief := range m.beliefs[1:] {
+			p_churn := belief[0] / (belief[0] + belief[1])
+			if math.Abs(p_churn-m.PChurn) > 1E-6 {
+				t.Errorf("wrong prior churn probability: got %6g, wanted %6g",
+					p_churn, m.PChurn)
+			}
+		}
 	}
 }
 

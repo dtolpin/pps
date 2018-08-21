@@ -1,3 +1,5 @@
+# Common shell commands
+
 # Git
 cd ~/go/src/bitbucket.org/dtolpin/pps; git commit -a -m 'model drafted'
 cd ~/go/src/bitbucket.org/dtolpin/pps; git push
@@ -9,6 +11,7 @@ cd ~/go/src/bitbucket.org/dtolpin/pps; git diff
 go test bitbucket.org/dtolpin/pps/...
 go fmt bitbucket.org/dtolpin/pps/...
 go build bitbucket.org/dtolpin/pps
+go install bitbucket.org/dtolpin/pps
 
 # Run
 

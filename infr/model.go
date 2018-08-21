@@ -27,7 +27,7 @@ func (m *Model) Init(total int) {
 // Method Prior resets the model to the prior beliefs.
 func (m *Model) Prior() {
 	m.beliefs[0][0], m.beliefs[0][1] = m.PBounce, 1.-m.PBounce
-	for i := 0; i != len(m.beliefs); i++ {
+	for i := 1; i != len(m.beliefs); i++ {
 		m.beliefs[i][0], m.beliefs[i][1] = m.PChurn, 1.-m.PChurn
 	}
 }
