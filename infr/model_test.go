@@ -3,6 +3,9 @@ package infr
 import "testing"
 import "math"
 
+// comparison accuracy
+const epsilon = 1E-6
+
 func TestInit(t *testing.T) {
 	var m Model
 	for _, c := range []struct {
@@ -58,13 +61,13 @@ func TestPrior(t *testing.T) {
 		m.Init(total)
 		m.Prior()
 		p_bounce := m.beliefs[0][0] / (m.beliefs[0][0] + m.beliefs[0][1])
-		if math.Abs(p_bounce-m.PBounce) > 1E-6 {
+		if math.Abs(p_bounce-m.PBounce) > epsilon {
 			t.Errorf("wrong prior bounce probability: got %6g, wanted %6g",
 				p_bounce, m.PBounce)
 		}
 		for _, belief := range m.beliefs[1:] {
 			p_churn := belief[0] / (belief[0] + belief[1])
-			if math.Abs(p_churn-m.PChurn) > 1E-6 {
+			if math.Abs(p_churn-m.PChurn) > epsilon {
 				t.Errorf("wrong prior churn probability: got %6g, wanted %6g",
 					p_churn, m.PChurn)
 			}
@@ -74,10 +77,11 @@ func TestPrior(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
     var m Model
-    m.Init(5)
     // we do not set prior beliefs here to simplify checking
 
-    // first check with bandwidth high enough to keep all evidence
+    // check with bandwidth high enough to keep all evidence
+    bandwidth := 1000.
+    m.Init(5)
     for k, c := range []struct {
         pps int
         beliefs Beliefs
@@ -88,12 +92,36 @@ func TestUpdate(t *testing.T) {
         {5, Beliefs{{1, 3}, {1, 2}, {1, 1}, {0, 1}, {1, 0}}},
         {8, Beliefs{{1, 4}, {1, 3}, {1, 2}, {0, 2}, {1, 1}}},
     } {
-       m.Update(/* bandwidth */ 1000, c.pps)
+       m.Update(bandwidth, c.pps)
        for i := 0; i != len(m.beliefs); i++ {
            for j := 0; j != len(m.beliefs[i]); j++ {
-               if m.beliefs[i][j] != c.beliefs[i][j] {
-                   t.Errorf("%d: wrong belief [%d, %d]: wanted %4g, got %g",
-                       k, i, j, c.beliefs[i][j], m.beliefs[i][j])
+               if math.Abs(m.beliefs[i][j] - c.beliefs[i][j]) > epsilon {
+                   t.Errorf("%d (bandwidth=%g): wrong belief [%d, %d]: wanted %4g, got %g",
+                       k, bandwidth, i, j, c.beliefs[i][j], m.beliefs[i][j])
+               }
+           }
+       }
+    }
+
+    // check with low bandwidth
+    bandwidth = 2.
+    m.Init(5)
+    for k, c := range []struct {
+        pps int
+        beliefs Beliefs
+    } {
+        {1, Beliefs{{1, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
+        {3, Beliefs{{1, 1}, {0, 1}, {1, 0}, {0, 0}, {0, 0}}},
+        {2, Beliefs{{1/1.5, 2/1.5}, {1, 1}, {1, 0}, {0, 0}, {0, 0}}},
+        {5, Beliefs{{1/2.25, 3.5/2.25}, {1/1.5, 2/1.5}, {1, 1}, {0, 1}, {1, 0}}},
+        {8, Beliefs{{1/3.375, 5.75/3.375}, {1/2.25, 3.5/2.25}, {1/1.5, 2/1.5}, {0, 2}, {1, 1}}},
+    } {
+       m.Update(bandwidth, c.pps)
+       for i := 0; i != len(m.beliefs); i++ {
+           for j := 0; j != len(m.beliefs[i]); j++ {
+               if math.Abs(m.beliefs[i][j] - c.beliefs[i][j]) > epsilon {
+                   t.Errorf("%d (bandwidth=%g): wrong belief [%d, %d]: wanted %4g, got %g",
+                       k, bandwidth, i, j, c.beliefs[i][j], m.beliefs[i][j])
                }
            }
        }
