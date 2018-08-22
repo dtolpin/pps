@@ -66,10 +66,10 @@ func (m *Model) Avg () (mean float64, std float64) {
     variance := 0.  // pps variance
     for _, belief := range m.Beliefs {
         // complementary distribution of Pr(stayed) here
-        dist := beta{belief[1], belief[0]}
-        pStayed *= dist.mean()
+        dist := Beta{belief[1], belief[0]}
+        pStayed *= dist.Mean()
         mean += pStayed
-        variance += pStayed * dist.variance()
+        variance += pStayed * dist.Variance()
     }
     std = math.Sqrt(variance)
 

@@ -1,15 +1,23 @@
 package model
 
-// Beta distribution parameters
-type beta struct {alpha, beta float64}
+import (
+    "fmt"
+)
 
-// Mean of the Beta distribution
-func (d *beta) mean () float64 {
-    return d.alpha / (d.alpha + d.beta)
+// Beta distribution parameters
+type Beta struct {Alpha, Beta float64}
+
+func (d Beta) String () string {
+    return fmt.Sprintf("Beta(%v, %v)", d.Alpha, d.Beta)
 }
 
-// Variance of the beta distribution
-func (d *beta) variance () float64 {
-    v := d.alpha + d.beta
-    return d.alpha * d.beta / (v * v  * (v + 1.))
+// Mean of the Beta distribution
+func (d *Beta) Mean () float64 {
+    return d.Alpha / (d.Alpha + d.Beta)
+}
+
+// Variance of the Beta distribution
+func (d *Beta) Variance () float64 {
+    v := d.Alpha + d.Beta
+    return d.Alpha * d.Beta / (v * v  * (v + 1.))
 }
