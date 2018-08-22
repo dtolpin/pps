@@ -1,4 +1,4 @@
-package infr
+package model
 
 import "testing"
 import "math"
@@ -6,7 +6,7 @@ import "math"
 // comparison accuracy
 const epsilon = 1E-6
 
-func TestInit(t *testing.T) {
+func TestNewModel(t *testing.T) {
 	for _, c := range []struct {
 		total   int
 		beliefs Beliefs

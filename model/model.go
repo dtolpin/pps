@@ -1,6 +1,5 @@
-// Package infr contains model and inference for predicting
-// pages per session based on page counts.
-package infr
+// Package model contains model of a session.
+package model
 
 import (
 	"math"

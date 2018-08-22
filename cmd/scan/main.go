@@ -1,3 +1,6 @@
+// Command scan runs over pps sequence (stored as a CSV file, last called is the pps)
+// and computes updated beliefs after each session. The output is enumerated CSV, where
+// each line is a flattened Beliefs vector.
 package main
 
 import (
@@ -9,7 +12,7 @@ import (
 	"os"
 	"strconv"
 
-	"bitbucket.org/dtolpin/pps/infr"
+	"bitbucket.org/dtolpin/pps/model"
 )
 
 const maxargs = 1
@@ -28,7 +31,7 @@ func main() {
 	}
 
 	// Create and initialize the model
-    m := infr.NewModel(*total)
+    m := model.NewModel(*total)
 	m.Prior()
 
 	// Go through the CSV data
