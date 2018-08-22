@@ -76,54 +76,54 @@ func TestPrior(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-    var m Model
-    // we do not set prior beliefs here to simplify checking
+	var m Model
+	// we do not set prior beliefs here to simplify checking
 
-    // check with bandwidth high enough to keep all evidence
-    bandwidth := 1000.
-    m.Init(5)
-    for k, c := range []struct {
-        pps int
-        beliefs Beliefs
-    } {
-        {1, Beliefs{{1, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
-        {3, Beliefs{{1, 1}, {0, 1}, {1, 0}, {0, 0}, {0, 0}}},
-        {2, Beliefs{{1, 2}, {1, 1}, {1, 0}, {0, 0}, {0, 0}}},
-        {5, Beliefs{{1, 3}, {1, 2}, {1, 1}, {0, 1}, {1, 0}}},
-        {8, Beliefs{{1, 4}, {1, 3}, {1, 2}, {0, 2}, {1, 1}}},
-    } {
-       m.Update(bandwidth, c.pps)
-       for i := 0; i != len(m.Beliefs); i++ {
-           for j := 0; j != len(m.Beliefs[i]); j++ {
-               if math.Abs(m.Beliefs[i][j] - c.beliefs[i][j]) > epsilon {
-                   t.Errorf("%d (bandwidth=%g): wrong belief [%d, %d]: wanted %4g, got %g",
-                       k, bandwidth, i, j, c.beliefs[i][j], m.Beliefs[i][j])
-               }
-           }
-       }
-    }
+	// check with bandwidth high enough to keep all evidence
+	bandwidth := 1000.
+	m.Init(5)
+	for k, c := range []struct {
+		pps     int
+		beliefs Beliefs
+	}{
+		{1, Beliefs{{1, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
+		{3, Beliefs{{1, 1}, {0, 1}, {1, 0}, {0, 0}, {0, 0}}},
+		{2, Beliefs{{1, 2}, {1, 1}, {1, 0}, {0, 0}, {0, 0}}},
+		{5, Beliefs{{1, 3}, {1, 2}, {1, 1}, {0, 1}, {1, 0}}},
+		{8, Beliefs{{1, 4}, {1, 3}, {1, 2}, {0, 2}, {1, 1}}},
+	} {
+		m.Update(bandwidth, c.pps)
+		for i := 0; i != len(m.Beliefs); i++ {
+			for j := 0; j != len(m.Beliefs[i]); j++ {
+				if math.Abs(m.Beliefs[i][j]-c.beliefs[i][j]) > epsilon {
+					t.Errorf("%d (bandwidth=%g): wrong belief [%d, %d]: wanted %4g, got %g",
+						k, bandwidth, i, j, c.beliefs[i][j], m.Beliefs[i][j])
+				}
+			}
+		}
+	}
 
-    // check with low bandwidth
-    bandwidth = 2.
-    m.Init(5)
-    for k, c := range []struct {
-        pps int
-        beliefs Beliefs
-    } {
-        {1, Beliefs{{1, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
-        {3, Beliefs{{1, 1}, {0, 1}, {1, 0}, {0, 0}, {0, 0}}},
-        {2, Beliefs{{1/1.5, 2/1.5}, {1, 1}, {1, 0}, {0, 0}, {0, 0}}},
-        {5, Beliefs{{1/2.25, 3.5/2.25}, {1/1.5, 2/1.5}, {1, 1}, {0, 1}, {1, 0}}},
-        {8, Beliefs{{1/3.375, 5.75/3.375}, {1/2.25, 3.5/2.25}, {1/1.5, 2/1.5}, {0, 2}, {1, 1}}},
-    } {
-       m.Update(bandwidth, c.pps)
-       for i := 0; i != len(m.Beliefs); i++ {
-           for j := 0; j != len(m.Beliefs[i]); j++ {
-               if math.Abs(m.Beliefs[i][j] - c.beliefs[i][j]) > epsilon {
-                   t.Errorf("%d (bandwidth=%g): wrong belief [%d, %d]: wanted %4g, got %g",
-                       k, bandwidth, i, j, c.beliefs[i][j], m.Beliefs[i][j])
-               }
-           }
-       }
-    }
+	// check with low bandwidth
+	bandwidth = 2.
+	m.Init(5)
+	for k, c := range []struct {
+		pps     int
+		beliefs Beliefs
+	}{
+		{1, Beliefs{{1, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
+		{3, Beliefs{{1, 1}, {0, 1}, {1, 0}, {0, 0}, {0, 0}}},
+		{2, Beliefs{{1 / 1.5, 2 / 1.5}, {1, 1}, {1, 0}, {0, 0}, {0, 0}}},
+		{5, Beliefs{{1 / 2.25, 3.5 / 2.25}, {1 / 1.5, 2 / 1.5}, {1, 1}, {0, 1}, {1, 0}}},
+		{8, Beliefs{{1 / 3.375, 5.75 / 3.375}, {1 / 2.25, 3.5 / 2.25}, {1 / 1.5, 2 / 1.5}, {0, 2}, {1, 1}}},
+	} {
+		m.Update(bandwidth, c.pps)
+		for i := 0; i != len(m.Beliefs); i++ {
+			for j := 0; j != len(m.Beliefs[i]); j++ {
+				if math.Abs(m.Beliefs[i][j]-c.beliefs[i][j]) > epsilon {
+					t.Errorf("%d (bandwidth=%g): wrong belief [%d, %d]: wanted %4g, got %g",
+						k, bandwidth, i, j, c.beliefs[i][j], m.Beliefs[i][j])
+				}
+			}
+		}
+	}
 }

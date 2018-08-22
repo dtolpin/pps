@@ -18,8 +18,8 @@ type Model struct {
 func (m *Model) Init(total int) {
 	m.Beliefs = make(Beliefs, total)
 
-    // We set prior probabilities here so that they
-    // can be re-used for resetting the beliefs:
+	// We set prior probabilities here so that they
+	// can be re-used for resetting the beliefs:
 	//   * half the visitors bounce off the first page,
 	m.pBounce = 0.5
 	//   * an average visitor views half the pages.
@@ -46,7 +46,7 @@ func (m *Model) Update(bandwidth float64, count int) {
 		} else {
 			j = 0
 		}
-        m.Beliefs[i][j] ++
+		m.Beliefs[i][j]++
 		// if the evidence exceeds the bandwidth, scale down
 		evidence := m.Beliefs[i][0] + m.Beliefs[i][1]
 		if evidence > bandwidth {
