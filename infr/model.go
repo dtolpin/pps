@@ -2,6 +2,10 @@
 // pages per session based on page counts.
 package infr
 
+import (
+	"math"
+)
+
 // Beliefs is an array of alpha, beta parameters of Beta distribution,
 // a tuple per page.
 type Beliefs [][2]float64
@@ -14,19 +18,14 @@ type Model struct {
 	pBounce, pChurn float64
 }
 
-// Method Init initializes the model.
-func (m *Model) Init(total int) {
-	m.Beliefs = make(Beliefs, total)
-
-	// We set prior probabilities here so that they
-	// can be re-used for resetting the beliefs:
-	//   * half the visitors bounce off the first page,
-	m.pBounce = 0.5
-	//   * an average visitor views half the pages.
-	m.pChurn = 2. / float64(total)
-	if m.pChurn > 1. {
-		m.pChurn = 1.
+// Function NewModel creates and initializes a model.
+func NewModel(total int) *Model {
+	m := Model {
+		Beliefs: make(Beliefs, total),
+		pBounce: 0.5,
+		pChurn: math.Min(1., 2./float64(total)),
 	}
+	return &m
 }
 
 // Method Prior resets the model to the prior beliefs.

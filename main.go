@@ -12,8 +12,6 @@ import (
 	"bitbucket.org/dtolpin/pps/infr"
 )
 
-var _ = fmt.Print
-
 const maxargs = 1
 
 func main() {
@@ -22,7 +20,7 @@ func main() {
 	total := flag.Int("total", 10,
 		"total page count")
 	thin := flag.Int("thin", 100,
-		"beliefs are output once per 'thin' columns")
+		"beliefs are output once per 'thin' rows")
 	flag.Parse()
 
 	if flag.NArg() > 0 {
@@ -30,14 +28,14 @@ func main() {
 	}
 
 	// Create and initialize the model
-	var m infr.Model
-	m.Init(*total)
+    m := infr.NewModel(*total)
 	m.Prior()
 
 	// Go through the CSV data
 	rdr := csv.NewReader(os.Stdin)
 	wtr := csv.NewWriter(os.Stdout)
 
+    rdr.Read() // skip the header
 	for iline := 1; ; iline++ {
 		record, err := rdr.Read()
 		if err == io.EOF {
@@ -55,15 +53,20 @@ func main() {
 		}
 
 		m.Update(*bandwidth, pps)
-		if iline%*thin == 0 {
-			record := make([]string, 2*len(m.Beliefs)+1)
+		if iline % *thin == 0 {
+			record := make([]string, 2*len(m.Beliefs) + 1)
 			record[0] = strconv.Itoa(iline)
 			for i, b := range m.Beliefs {
 				for j := 0; j != 2; j++ {
-					record[1+2*i+j] = fmt.Sprintf("%.2f", b[j])
+					record[1 + 2*i + j] = fmt.Sprintf("%.2f", b[j])
 				}
 			}
-			wtr.Write(record)
+            err := wtr.Write(record)
+            if err != nil {
+                log.Fatal(err)
+            }
 		}
 	}
+
+    wtr.Flush()
 }

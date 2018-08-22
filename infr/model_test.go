@@ -7,7 +7,6 @@ import "math"
 const epsilon = 1E-6
 
 func TestInit(t *testing.T) {
-	var m Model
 	for _, c := range []struct {
 		total   int
 		beliefs Beliefs
@@ -16,7 +15,7 @@ func TestInit(t *testing.T) {
 		{3, Beliefs{{0, 0}, {0, 0}, {0, 0}}},
 		{5, Beliefs{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
 	} {
-		m.Init(c.total)
+        m := NewModel(c.total)
 
 		// check that we have the belief vector of the right size
 		switch {
@@ -56,9 +55,8 @@ func TestInit(t *testing.T) {
 }
 
 func TestPrior(t *testing.T) {
-	var m Model
 	for _, total := range []int{1, 2, 5} {
-		m.Init(total)
+        m := NewModel(total)
 		m.Prior()
 		pBounce := m.Beliefs[0][0] / (m.Beliefs[0][0] + m.Beliefs[0][1])
 		if math.Abs(pBounce-m.pBounce) > epsilon {
@@ -76,12 +74,9 @@ func TestPrior(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	var m Model
-	// we do not set prior beliefs here to simplify checking
-
 	// check with bandwidth high enough to keep all evidence
+    m := NewModel(5)
 	bandwidth := 1000.
-	m.Init(5)
 	for k, c := range []struct {
 		pps     int
 		beliefs Beliefs
@@ -104,8 +99,8 @@ func TestUpdate(t *testing.T) {
 	}
 
 	// check with low bandwidth
+    m = NewModel(5)
 	bandwidth = 2.
-	m.Init(5)
 	for k, c := range []struct {
 		pps     int
 		beliefs Beliefs
