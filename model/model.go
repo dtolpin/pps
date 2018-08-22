@@ -57,3 +57,21 @@ func (m *Model) Update(bandwidth float64, count int) {
 		}
 	}
 }
+
+// Method Avg returns mean and standard deviation of pps,
+// based on current beliefs
+func (m *Model) Avg () (mean float64, std float64) {
+    pStayed := 1. // probability the user stayed by the current page
+    mean = pStayed // mean pps
+    variance := 0.  // pps variance
+    for _, belief := range m.Beliefs {
+        // complementary distribution of Pr(stayed) here
+        dist := beta{belief[1], belief[0]}
+        pStayed *= dist.mean()
+        mean += pStayed
+        variance += pStayed * dist.variance()
+    }
+    std = math.Sqrt(variance)
+
+    return mean, std
+}

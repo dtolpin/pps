@@ -15,8 +15,6 @@ import (
 	"bitbucket.org/dtolpin/pps/model"
 )
 
-const maxargs = 1
-
 func main() {
 	bandwidth := flag.Float64("bandwidth", 100.,
 		"bandwidth of prior belief")
@@ -24,6 +22,8 @@ func main() {
 		"total page count")
 	thin := flag.Int("thin", 100,
 		"beliefs are output once per 'thin' rows")
+    floatFmt := flag.String("floatFmt", "%.3f",
+        "format for floats in the output CSV file")
 	flag.Parse()
 
 	if flag.NArg() > 0 {
@@ -38,7 +38,25 @@ func main() {
 	rdr := csv.NewReader(os.Stdin)
 	wtr := csv.NewWriter(os.Stdout)
 
+    // assume pps is the last column
     rdr.Read() // skip the header
+
+    // write the output header
+    header := make([]string, 3 + 2*len(m.Beliefs))
+    header[0] = "iline"
+    header[1] = "mean"
+    header[2] = "variance"
+    for i := 0; i != len(m.Beliefs); i++ {
+        header[3 + 2*i] = fmt.Sprintf("a%d", i)
+        header[3 + 2*i + 1] = fmt.Sprintf("b%d", i)
+    }
+    err := wtr.Write(header)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // run through sessions and output beliefs every 
+    // 'thin' sessions
 	for iline := 1; ; iline++ {
 		record, err := rdr.Read()
 		if err == io.EOF {
@@ -57,11 +75,14 @@ func main() {
 
 		m.Update(*bandwidth, pps)
 		if iline % *thin == 0 {
-			record := make([]string, 2*len(m.Beliefs) + 1)
+            mean, std := m.Avg()
+			record := make([]string, 3 + 2*len(m.Beliefs))
 			record[0] = strconv.Itoa(iline)
+            record[1] = fmt.Sprintf(*floatFmt, mean)
+            record[2] = fmt.Sprintf(*floatFmt, std)
 			for i, b := range m.Beliefs {
 				for j := 0; j != 2; j++ {
-					record[1 + 2*i + j] = fmt.Sprintf("%.2f", b[j])
+					record[3 + 2*i + j] = fmt.Sprintf(*floatFmt, b[j])
 				}
 			}
             err := wtr.Write(record)
