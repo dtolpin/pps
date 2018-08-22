@@ -6,10 +6,10 @@ package main
 import (
 	csv "encoding/csv"
 	"flag"
-	"fmt"
+	"os"
 	"io"
 	"log"
-	"os"
+	"fmt"
 	"strconv"
 
 	"bitbucket.org/dtolpin/pps/model"
@@ -77,7 +77,7 @@ func main() {
 		if iline % *thin == 0 {
             mean, std := m.Avg()
 			record := make([]string, 3 + 2*len(m.Beliefs))
-			record[0] = strconv.Itoa(iline)
+			record[0] = fmt.Sprintf("%d", iline)
             record[1] = fmt.Sprintf(*floatFmt, mean)
             record[2] = fmt.Sprintf(*floatFmt, std)
 			for i, b := range m.Beliefs {

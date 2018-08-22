@@ -2,6 +2,7 @@ package model
 
 import (
     "testing"
+	"fmt"
     "math"
 )
 
@@ -25,5 +26,17 @@ func TestBeta(t *testing.T) {
             t.Errorf("wrong variance of %v: got %.6g, want %v",
 				&dist, variance, c.variance)
 		}
+	}
+}
+
+func TestBetaString(t *testing.T) {
+	dist := Beta{1, 2}
+	if fmt.Sprint(dist) != "Beta(1, 2)" {
+		t.Errorf("%#v must print as Beta(%v, %v)",
+			dist, dist.Alpha, dist.Beta)
+	}
+	if fmt.Sprint(&dist) != "Beta(1, 2)" {
+		t.Errorf("%#v must print as Beta(%v, %v)",
+			&dist, dist.Alpha, dist.Beta)
 	}
 }
