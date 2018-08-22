@@ -6,10 +6,10 @@ package main
 import (
 	csv "encoding/csv"
 	"flag"
-	"os"
+	"fmt"
 	"io"
 	"log"
-	"fmt"
+	"os"
 	"strconv"
 
 	"bitbucket.org/dtolpin/pps/model"
@@ -22,8 +22,8 @@ func main() {
 		"total page count")
 	thin := flag.Int("thin", 100,
 		"beliefs are output once per 'thin' rows")
-    floatFmt := flag.String("floatFmt", "%.3f",
-        "format for floats in the output CSV file")
+	floatFmt := flag.String("floatFmt", "%.3f",
+		"format for floats in the output CSV file")
 	flag.Parse()
 
 	if flag.NArg() > 0 {
@@ -31,32 +31,32 @@ func main() {
 	}
 
 	// Create and initialize the model
-    m := model.NewModel(*total)
+	m := model.NewModel(*total)
 	m.Prior()
 
 	// Go through the CSV data
 	rdr := csv.NewReader(os.Stdin)
 	wtr := csv.NewWriter(os.Stdout)
 
-    // assume pps is the last column
-    rdr.Read() // skip the header
+	// assume pps is the last column
+	rdr.Read() // skip the header
 
-    // write the output header
-    header := make([]string, 3 + 2*len(m.Beliefs))
-    header[0] = "iline"
-    header[1] = "mean"
-    header[2] = "variance"
-    for i := 0; i != len(m.Beliefs); i++ {
-        header[3 + 2*i] = fmt.Sprintf("a%d", i)
-        header[3 + 2*i + 1] = fmt.Sprintf("b%d", i)
-    }
-    err := wtr.Write(header)
-    if err != nil {
-        log.Fatal(err)
-    }
+	// write the output header
+	header := make([]string, 3+2*len(m.Beliefs))
+	header[0] = "iline"
+	header[1] = "mean"
+	header[2] = "variance"
+	for i := 0; i != len(m.Beliefs); i++ {
+		header[3+2*i] = fmt.Sprintf("a%d", i)
+		header[3+2*i+1] = fmt.Sprintf("b%d", i)
+	}
+	err := wtr.Write(header)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    // run through sessions and output beliefs every 
-    // 'thin' sessions
+	// run through sessions and output beliefs every
+	// 'thin' sessions
 	for iline := 1; ; iline++ {
 		record, err := rdr.Read()
 		if err == io.EOF {
@@ -74,23 +74,23 @@ func main() {
 		}
 
 		m.Update(*bandwidth, pps)
-		if iline % *thin == 0 {
-            mean, std := m.Avg()
-			record := make([]string, 3 + 2*len(m.Beliefs))
+		if iline%*thin == 0 {
+			mean, std := m.Avg()
+			record := make([]string, 3+2*len(m.Beliefs))
 			record[0] = fmt.Sprintf("%d", iline)
-            record[1] = fmt.Sprintf(*floatFmt, mean)
-            record[2] = fmt.Sprintf(*floatFmt, std)
+			record[1] = fmt.Sprintf(*floatFmt, mean)
+			record[2] = fmt.Sprintf(*floatFmt, std)
 			for i, b := range m.Beliefs {
 				for j := 0; j != 2; j++ {
-					record[3 + 2*i + j] = fmt.Sprintf(*floatFmt, b[j])
+					record[3+2*i+j] = fmt.Sprintf(*floatFmt, b[j])
 				}
 			}
-            err := wtr.Write(record)
-            if err != nil {
-                log.Fatal(err)
-            }
+			err := wtr.Write(record)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
-    wtr.Flush()
+	wtr.Flush()
 }

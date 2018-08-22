@@ -1,8 +1,8 @@
 package model
 
-import  (
-  "testing"
-  "math"
+import (
+	"math"
+	"testing"
 )
 
 // comparison accuracy
@@ -17,7 +17,7 @@ func TestNewModel(t *testing.T) {
 		{3, Beliefs{{0, 0}, {0, 0}, {0, 0}}},
 		{5, Beliefs{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
 	} {
-        m := NewModel(c.total)
+		m := NewModel(c.total)
 
 		// check that we have the belief vector of the right size
 		switch {
@@ -58,7 +58,7 @@ func TestNewModel(t *testing.T) {
 
 func TestPrior(t *testing.T) {
 	for _, total := range []int{1, 2, 5} {
-        m := NewModel(total)
+		m := NewModel(total)
 		m.Prior()
 		pBounce := m.Beliefs[0][0] / (m.Beliefs[0][0] + m.Beliefs[0][1])
 		if math.Abs(pBounce-m.pBounce) > epsilon {
@@ -77,7 +77,7 @@ func TestPrior(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	// check with bandwidth high enough to keep all evidence
-    m := NewModel(5)
+	m := NewModel(5)
 	bandwidth := 1000.
 	for k, c := range []struct {
 		pps     int
@@ -101,7 +101,7 @@ func TestUpdate(t *testing.T) {
 	}
 
 	// check with low bandwidth
-    m = NewModel(5)
+	m = NewModel(5)
 	bandwidth = 2.
 	for k, c := range []struct {
 		pps     int

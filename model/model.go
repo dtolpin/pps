@@ -19,10 +19,10 @@ type Model struct {
 
 // Function NewModel creates and initializes a model.
 func NewModel(total int) *Model {
-	m := Model {
+	m := Model{
 		Beliefs: make(Beliefs, total),
 		pBounce: 0.5,
-		pChurn: math.Min(1., 2./float64(total)),
+		pChurn:  math.Min(1., 2./float64(total)),
 	}
 	return &m
 }
@@ -60,18 +60,18 @@ func (m *Model) Update(bandwidth float64, count int) {
 
 // Method Avg returns mean and standard deviation of pps,
 // based on current beliefs
-func (m *Model) Avg () (mean float64, std float64) {
-    pStayed := 1. // probability the user stayed by the current page
-    mean = pStayed // mean pps
-    variance := 0.  // pps variance
-    for _, belief := range m.Beliefs {
-        // complementary distribution of Pr(stayed) here
-        dist := Beta{belief[1], belief[0]}
-        pStayed *= dist.Mean()
-        mean += pStayed
-        variance += pStayed * dist.Variance()
-    }
-    std = math.Sqrt(variance)
+func (m *Model) Avg() (mean float64, std float64) {
+	pStayed := 1.  // probability the user stayed by the current page
+	mean = pStayed // mean pps
+	variance := 0. // pps variance
+	for _, belief := range m.Beliefs {
+		// complementary distribution of Pr(stayed) here
+		dist := Beta{belief[1], belief[0]}
+		pStayed *= dist.Mean()
+		mean += pStayed
+		variance += pStayed * dist.Variance()
+	}
+	std = math.Sqrt(variance)
 
-    return mean, std
+	return mean, std
 }
