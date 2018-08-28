@@ -11,13 +11,13 @@ cd ~/go/src/bitbucket.org/dtolpin/pps; git diff
 go test bitbucket.org/dtolpin/pps/... | less
 go fmt bitbucket.org/dtolpin/pps/...
 
-cd ~/go/src/bitbucket.org/dtolpin/pps; go build bitbucket.org/dtolpin/pps/cmd/scan
+cd ~/go/src/bitbucket.org/dtolpin/pps; go build bitbucket.org/dtolpin/pps/cmd/...
 
 go install bitbucket.org/dtolpin/pps
 
 # Run
 
-cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'Athletes Spouses TBT - Mobile USA OB - PPS.csv' | head -101 > pps.csv )
+cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'Athletes Spouses TBT - Mobile USA OB - PPS.csv' | head -51 > pps.csv )
 cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'John Life NVT2 - Tablet USA OB - PPS.csv' | head -101 > pps.csv )
 cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'Sam Elliott Life VPNS - Desktop USA OB - PPS.csv' | head -101 > pps.csv )
 

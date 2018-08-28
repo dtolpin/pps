@@ -47,13 +47,13 @@ func makeRecord(iline int, m *model.Model, floatFmt string) []string {
 }
 
 func main() {
-	bandwidth := *flag.Float64("bandwidth", 100.,
+	bandwidth := flag.Float64("bandwidth", 100.,
 		"bandwidth of prior belief")
-	total := *flag.Int("total", 10,
+	total := flag.Int("total", 10,
 		"total page count")
-	thin := *flag.Int("thin", 100,
+	thin := flag.Int("thin", 100,
 		"beliefs are output once per 'thin' rows")
-	floatFmt := *flag.String("floatFmt", "%.3f",
+	floatFmt := flag.String("floatFmt", "%.3f",
 		"format for floats in the output CSV file")
 	flag.Parse()
 
@@ -62,7 +62,7 @@ func main() {
 	}
 
 	// Create and initialize the model
-	m := model.NewModel(total)
+	m := model.NewModel(*total)
 	m.Prior()
 
 	// Go through the CSV data
@@ -98,9 +98,9 @@ func main() {
 			continue
 		}
 
-		m.Update(bandwidth, pps)
-		if iline % thin == 0 {
-			record := makeRecord(iline, m, floatFmt)
+		m.Update(*bandwidth, pps)
+		if iline % *thin == 0 {
+			record := makeRecord(iline, m, *floatFmt)
 			err := wtr.Write(record)
 			if err != nil {
 				log.Fatal(err)

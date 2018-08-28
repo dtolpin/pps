@@ -38,7 +38,7 @@ func TestMakeRecord(t *testing.T) {
             "1.0", "0.0",
             "1.0", "0.0"}}} {
 
-        // avoid zero evidence
+        // initialize evidence 
 		m := model.NewModel(c.total)
         for i := 0; i != c.total; i++ {
             m.Beliefs[i][0] = 1.
