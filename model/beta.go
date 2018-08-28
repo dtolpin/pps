@@ -13,11 +13,18 @@ func (d Beta) String() string {
 
 // Mean of the Beta distribution
 func (d Beta) Mean() float64 {
+    v := d.Alpha + d.Beta
+    if v == 0. {
+        return 0.
+    }
 	return d.Alpha / (d.Alpha + d.Beta)
 }
 
 // Variance of the Beta distribution
 func (d Beta) Variance() float64 {
 	v := d.Alpha + d.Beta
+    if v == 0. {
+        return 0.
+    }
 	return d.Alpha * d.Beta / (v * v * (v + 1.))
 }
