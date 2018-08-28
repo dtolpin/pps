@@ -33,12 +33,17 @@ func TestMakeRecord(t *testing.T) {
 		record []string
 	}{
         {0, 10, []string{"10", "1.0", "0.0"}},
-		{1, 20, []string{"20", "1.0", "0.0", "0.0", "0.0"}},
+		{1, 20, []string{"20", "1.0", "0.0", "1.0", "0.0"}},
 		{2, 30, []string{"30", "1.0", "0.0",
-            "0.0", "0.0",
-            "0.0", "0.0"}}} {
+            "1.0", "0.0",
+            "1.0", "0.0"}}} {
 
+        // avoid zero evidence
 		m := model.NewModel(c.total)
+        for i := 0; i != c.total; i++ {
+            m.Beliefs[i][0] = 1.
+        }
+
 		record := makeRecord(c.iline, m, "%.1f")
 		if !reflect.DeepEqual(record, c.record) {
 			t.Errorf("wrong record: total=%v, got %#v, want %#v",
