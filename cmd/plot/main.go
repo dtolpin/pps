@@ -28,6 +28,7 @@ var DPI int = 120
 var PATTERN string = "pps-%06v.gif"
 var QUIET bool = false
 
+// Bind global configuration variables to command-line options
 func init() {
 	flag.Float64Var(&Z, "Z", Z, "error scale in standard deviations")
 	flag.IntVar(&DPI, "dpi", DPI, "DPI for plots")
@@ -35,31 +36,19 @@ func init() {
 	flag.BoolVar(&QUIET, "quiet", QUIET, "make less noise")
 }
 
-// define point with error bar
-func pterr(pts plotter.XYs, i int, m, s float64) {
-	k := (i - 3) / 2
-	j := 4 * k
-	x := float64(k)
-	pts[j].X = x
-	pts[j].Y = m
-	pts[j+1].X = x
-	pts[j+1].Y = m + Z*s
-	pts[j+2].X = x
-	pts[j+2].Y = m - Z*s
-	pts[j+3].X = x
-	pts[j+3].Y = m
+// describe point for page churn probability
+func pagePChurnErr(x, m, s float64) plotter.XYs {
+	return plotter.XYs{{x, m}, {x, m + Z*s}, {x, m - Z*s}, {x, m}}
 }
 
-// define PPS mean/std marker
-func meanstd(mean, std float64) plotter.XYs {
-	return plotter.XYs{
-		{mean - Z*std, 0.},
-		{mean, 0.5},
-		{mean + Z*std, 0.}}
+// describe mean PPS marker
+func ppsMeanErr(mean, std float64) plotter.XYs {
+	return plotter.XYs{{mean - Z*std, 0.}, {mean, 0.5}, {mean + Z*std, 0.}}
 }
 
-// define points and mean for record
-func points(record []string) (float64, float64, plotter.XYs) {
+// prepare data for plotting
+func parseRecord(record []string) (title string, marker plotter.XYs, pages plotter.XYs) {
+	// PPS mean and std
 	mean, err := strconv.ParseFloat(record[1], 64)
 	if err != nil {
 		log.Panic(err)
@@ -68,8 +57,13 @@ func points(record []string) (float64, float64, plotter.XYs) {
 	if err != nil {
 		log.Panic(err)
 	}
-	pts := make(plotter.XYs, (len(record)-3)/2*4)
+	title = fmt.Sprintf("PPS = %.2f±%.2f", mean, Z*std)
+	marker = ppsMeanErr(mean, std)
+
+	// per-page churn beliefs
+	pages = make(plotter.XYs, (len(record)-3)/2*4) // 4 points per page
 	for i := 3; i != len(record); i += 2 {
+		// parse beliefs and convert to mean and std
 		alpha, err := strconv.ParseFloat(record[i], 64)
 		if err != nil {
 			log.Panic(err)
@@ -78,15 +72,23 @@ func points(record []string) (float64, float64, plotter.XYs) {
 		if err != nil {
 			log.Panic(err)
 		}
+
 		dist := model.Beta{alpha, beta}
 		m := dist.Mean()
 		s := math.Sqrt(dist.Variance())
-		pterr(pts, i, m, s)
+
+		// fill in the page points
+		k := (i - 3) / 2
+		j := 4 * k
+		x := float64(k)
+		page := pagePChurnErr(x, m, s)
+		copy(pages[j:j+len(page)], page)
 	}
-	return mean, std, pts
+
+	return title, marker, pages
 }
 
-// Write to file.
+// Write to file
 func writePlot(iline int, p *plot.Plot) {
 	img := image.NewRGBA(image.Rect(0, 0, 7*DPI, 3*DPI))
 	c := vgimg.NewWith(vgimg.UseImage(img))
@@ -122,28 +124,29 @@ func main() {
 			log.Fatal(err)
 		}
 
-        func () {
-            iline, _ := strconv.Atoi(record[0])
-            defer func () {
-                if r := recover(); r != nil {
-                    log.Printf("skipping " + PATTERN, iline)
-                }
-            }()
+		// wrap record handling into a function to
+		// skip faulty records
+		func() {
+			iline, _ := strconv.Atoi(record[0])
+			defer func() {
+				if r := recover(); r != nil {
+					log.Printf("skipping "+PATTERN, iline)
+				}
+			}()
 
-            p, err := plot.New()
-            if err != nil {
-                log.Panic(err)
-            }
-            mean, std, pts := points(record)
+			p, err := plot.New()
+			if err != nil {
+				log.Panic(err)
+			}
 
-            p.Title.Text = fmt.Sprintf("session %v, PPS = %.2f±%.2f", iline, mean, Z*std)
-            p.X.Label.Text = "page#"
+			title, marker, pages := parseRecord(record)
+			p.Title.Text = fmt.Sprintf("Session %v: %v", iline, title)
+			p.X.Label.Text = "Page#"
+			plotutil.AddLines(p,
+				"P(churn)", pages,
+				"PPS", marker)
 
-            plotutil.AddLines(p,
-                "P(Churn)", pts,
-                "mean(PPS)", meanstd(mean, std))
-
-            writePlot(iline, p)
-        }()
+			writePlot(iline, p)
+		}()
 	}
 }
