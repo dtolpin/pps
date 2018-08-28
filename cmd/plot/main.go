@@ -7,12 +7,12 @@ import (
 	_ "log"
 	"os"
 
-	csv "encoding/csv"
+	"encoding/csv"
 	"math"
 	"strconv"
 
 	"image"
-	gif "image/gif"
+	"image/gif"
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"

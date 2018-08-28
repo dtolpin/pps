@@ -15,6 +15,36 @@ import (
 	"bitbucket.org/dtolpin/pps/model"
 )
 
+// Creates the output CSV header
+func makeHeader(m *model.Model) []string {
+    total := len(m.Beliefs)
+	header := make([]string, 3 + 2*total)
+	header[0] = "iline"
+	header[1] = "mean"
+	header[2] = "variance"
+	for i := 0; i != total; i++ {
+		header[3 + 2*i] = fmt.Sprintf("a%d", i)
+		header[3 + 2*i + 1] = fmt.Sprintf("b%d", i)
+    }
+    return header
+}
+
+// Creates a record from the model state
+func makeRecord(iline int, m *model.Model, floatFmt *string) []string {
+    total := len(m.Beliefs)
+    mean, std := m.Avg()
+    record := make([]string, 3 + 2*total)
+    record[0] = fmt.Sprintf("%d", iline)
+    record[1] = fmt.Sprintf(*floatFmt, mean)
+    record[2] = fmt.Sprintf(*floatFmt, std)
+    for i, b := range m.Beliefs {
+        for j := 0; j != 2; j++ {
+            record[3 + 2*i + j] = fmt.Sprintf(*floatFmt, b[j])
+        }
+    }
+    return record
+}
+
 func main() {
 	bandwidth := flag.Float64("bandwidth", 100.,
 		"bandwidth of prior belief")
@@ -37,19 +67,13 @@ func main() {
 	// Go through the CSV data
 	rdr := csv.NewReader(os.Stdin)
 	wtr := csv.NewWriter(os.Stdout)
+    wtr.Flush()
 
 	// assume pps is the last column
 	rdr.Read() // skip the header
 
 	// write the output header
-	header := make([]string, 3+2*len(m.Beliefs))
-	header[0] = "iline"
-	header[1] = "mean"
-	header[2] = "variance"
-	for i := 0; i != len(m.Beliefs); i++ {
-		header[3+2*i] = fmt.Sprintf("a%d", i)
-		header[3+2*i+1] = fmt.Sprintf("b%d", i)
-	}
+    header := makeHeader(m)
 	err := wtr.Write(header)
 	if err != nil {
 		log.Fatal(err)
@@ -75,22 +99,11 @@ func main() {
 
 		m.Update(*bandwidth, pps)
 		if iline%*thin == 0 {
-			mean, std := m.Avg()
-			record := make([]string, 3+2*len(m.Beliefs))
-			record[0] = fmt.Sprintf("%d", iline)
-			record[1] = fmt.Sprintf(*floatFmt, mean)
-			record[2] = fmt.Sprintf(*floatFmt, std)
-			for i, b := range m.Beliefs {
-				for j := 0; j != 2; j++ {
-					record[3+2*i+j] = fmt.Sprintf(*floatFmt, b[j])
-				}
-			}
+            record := makeRecord(iline, m, floatFmt)
 			err := wtr.Write(record)
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
 	}
-
-	wtr.Flush()
 }
