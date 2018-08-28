@@ -13,7 +13,7 @@ func (d Beta) String() string {
 
 // Mean of the Beta distribution
 func (d Beta) Mean() float64 {
-    v := d.Alpha + d.Beta
+	v := d.Alpha + d.Beta
 	return d.Alpha / v
 }
 

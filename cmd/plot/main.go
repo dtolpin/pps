@@ -1,7 +1,7 @@
 package main
 
 import (
-    "flag"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -20,18 +20,19 @@ import (
 	"gonum.org/v1/plot/vg/draw"
 	"gonum.org/v1/plot/vg/vgimg"
 
-    "bitbucket.org/dtolpin/pps/model"
+	"bitbucket.org/dtolpin/pps/model"
 )
 
 var Z float64 = 2.
 var DPI int = 120
 var PATTERN string = "pps-%06v.gif"
 var QUIET bool = false
-func init () {
-    flag.Float64Var(&Z, "Z", Z, "error scale in standard deviations")
-    flag.IntVar(&DPI, "dpi", DPI, "DPI for plots")
-    flag.StringVar(&PATTERN, "pattern", PATTERN, "file name pattern for generated plots")
-    flag.BoolVar(&QUIET, "quiet", QUIET, "make less noise")
+
+func init() {
+	flag.Float64Var(&Z, "Z", Z, "error scale in standard deviations")
+	flag.IntVar(&DPI, "dpi", DPI, "DPI for plots")
+	flag.StringVar(&PATTERN, "pattern", PATTERN, "file name pattern for generated plots")
+	flag.BoolVar(&QUIET, "quiet", QUIET, "make less noise")
 }
 
 // define point with error bar
@@ -51,10 +52,10 @@ func pterr(pts plotter.XYs, i int, m, s float64) {
 
 // define PPS mean/std marker
 func meanstd(mean, std float64) plotter.XYs {
-    return plotter.XYs{
-        {mean - Z * std, 0.},
-        {mean, 0.5},
-        {mean + Z * std, 0.}}
+	return plotter.XYs{
+		{mean - Z*std, 0.},
+		{mean, 0.5},
+		{mean + Z*std, 0.}}
 }
 
 // define points and mean for record
@@ -65,19 +66,19 @@ func points(record []string) (float64, float64, plotter.XYs) {
 	}
 	std, err := strconv.ParseFloat(record[2], 64)
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err)
 	}
-	pts := make(plotter.XYs, (len(record) - 3)/2*4)
+	pts := make(plotter.XYs, (len(record)-3)/2*4)
 	for i := 3; i != len(record); i += 2 {
 		alpha, err := strconv.ParseFloat(record[i], 64)
 		if err != nil {
-			fmt.Println(err)
+			log.Panic(err)
 		}
 		beta, err := strconv.ParseFloat(record[i+1], 64)
 		if err != nil {
-			fmt.Println(err)
+			log.Panic(err)
 		}
-        dist := model.Beta{alpha, beta}
+		dist := model.Beta{alpha, beta}
 		m := dist.Mean()
 		s := math.Sqrt(dist.Variance())
 		pterr(pts, i, m, s)
@@ -87,31 +88,31 @@ func points(record []string) (float64, float64, plotter.XYs) {
 
 // Write to file.
 func writePlot(iline int, p *plot.Plot) {
-    img := image.NewRGBA(image.Rect(0, 0, 7*DPI, 3*DPI))
-    c := vgimg.NewWith(vgimg.UseImage(img))
-    p.Draw(draw.New(c))
+	img := image.NewRGBA(image.Rect(0, 0, 7*DPI, 3*DPI))
+	c := vgimg.NewWith(vgimg.UseImage(img))
+	p.Draw(draw.New(c))
 
-    fname := fmt.Sprintf(PATTERN, iline)
-    if !QUIET {
-        log.Println(fname)
-    }
+	fname := fmt.Sprintf(PATTERN, iline)
+	if !QUIET {
+		log.Println(fname)
+	}
 
-    f, err := os.Create(fmt.Sprintf(PATTERN, iline))
-    defer f.Close()
-    if err != nil {
-        log.Panic(err)
-    }
+	f, err := os.Create(fmt.Sprintf(PATTERN, iline))
+	defer f.Close()
+	if err != nil {
+		log.Panic(err)
+	}
 
-    if err := gif.Encode(f, img, nil); err != nil {
-        log.Panic(err)
-    }
+	if err := gif.Encode(f, img, nil); err != nil {
+		log.Panic(err)
+	}
 }
 
 func main() {
-    flag.Parse()
+	flag.Parse()
 
 	rdr := csv.NewReader(os.Stdin)
-    rdr.Read() // skip the header
+	rdr.Read() // skip the header
 	for i := 0; ; i++ {
 		record, err := rdr.Read()
 		if err == io.EOF {
@@ -121,17 +122,28 @@ func main() {
 			log.Fatal(err)
 		}
 
-		p, err := plot.New()
-		mean, std, pts := points(record)
-        iline, _ := strconv.Atoi(record[0])
+        func () {
+            iline, _ := strconv.Atoi(record[0])
+            defer func () {
+                if r := recover(); r != nil {
+                    log.Printf("skipping " + PATTERN, iline)
+                }
+            }()
 
-		p.Title.Text = fmt.Sprintf("session %v, PPS = %.2f±%.2f", iline, mean, Z*std)
-		p.X.Label.Text = "page#"
+            p, err := plot.New()
+            if err != nil {
+                log.Panic(err)
+            }
+            mean, std, pts := points(record)
 
-		plotutil.AddLines(p,
-			"P(Churn)", pts,
-			"mean(PPS)", meanstd(mean, std))
+            p.Title.Text = fmt.Sprintf("session %v, PPS = %.2f±%.2f", iline, mean, Z*std)
+            p.X.Label.Text = "page#"
 
-        writePlot(iline, p)
+            plotutil.AddLines(p,
+                "P(Churn)", pts,
+                "mean(PPS)", meanstd(mean, std))
+
+            writePlot(iline, p)
+        }()
 	}
 }

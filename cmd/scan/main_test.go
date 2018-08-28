@@ -29,20 +29,20 @@ func TestMakeHeader(t *testing.T) {
 func TestMakeRecord(t *testing.T) {
 	for _, c := range []struct {
 		total  int
-        iline int
+		iline  int
 		record []string
 	}{
-        {0, 10, []string{"10", "1.0", "0.0"}},
+		{0, 10, []string{"10", "1.0", "0.0"}},
 		{1, 20, []string{"20", "1.0", "0.0", "1.0", "0.0"}},
 		{2, 30, []string{"30", "1.0", "0.0",
-            "1.0", "0.0",
-            "1.0", "0.0"}}} {
+			"1.0", "0.0",
+			"1.0", "0.0"}}} {
 
-        // initialize evidence 
+		// initialize evidence
 		m := model.NewModel(c.total)
-        for i := 0; i != c.total; i++ {
-            m.Beliefs[i][0] = 1.
-        }
+		for i := 0; i != c.total; i++ {
+			m.Beliefs[i][0] = 1.
+		}
 
 		record := makeRecord(c.iline, m, "%.1f")
 		if !reflect.DeepEqual(record, c.record) {

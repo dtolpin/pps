@@ -4,7 +4,7 @@
 package main
 
 import (
-	csv "encoding/csv"
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"io"
@@ -34,7 +34,7 @@ func makeHeader(m *model.Model) []string {
 func makeRecord(iline int, m *model.Model, floatFmt string) []string {
 	total := len(m.Beliefs)
 	mean, std := m.Avg()
-	record := make([]string, 3 + 2*total)
+	record := make([]string, 3+2*total)
 	record[0] = fmt.Sprintf("%d", iline)
 	record[1] = fmt.Sprintf(floatFmt, mean)
 	record[2] = fmt.Sprintf(floatFmt, std)
@@ -99,7 +99,7 @@ func main() {
 		}
 
 		m.Update(*bandwidth, pps)
-		if iline % *thin == 0 {
+		if iline%*thin == 0 {
 			record := makeRecord(iline, m, *floatFmt)
 			err := wtr.Write(record)
 			if err != nil {
