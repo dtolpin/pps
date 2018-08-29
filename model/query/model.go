@@ -5,10 +5,11 @@ import (
     "bitbucket.org/dtolpin/pps/model"
 )
 
-// Model extends model.Model with Observe. Observe is used
+// Model extends model.Model with Observe and prior bandwidth. Observe is used
 // in the probabilistic query.
 type Model struct {
     model.Model
+    bandwidth float64
 }
 
 // Function NewModel creates and initializes a model.
@@ -18,7 +19,7 @@ func NewModel(total int) *Model {
 	return m
 }
 
-// Method Observe computes log probability of the page count
+// Method observe computes log probability of the page count
 // given the model.
 func (m *Model) Observe(count int) float64 {
     logp := 0.
