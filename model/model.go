@@ -19,12 +19,17 @@ type Model struct {
 
 // Function NewModel creates and initializes a model.
 func NewModel(total int) *Model {
-	m := Model{
-		Beliefs: make(Beliefs, total),
-		pBounce: 0.5,
-		pChurn:  math.Min(1., 2./float64(total)),
-	}
-	return &m
+    m := new(Model)
+    m.Init(total)
+	return m
+}
+
+// Method Init initializes the model. It is intended to be called by NewModel
+// in this module and in successors.
+func (m *Model) Init(total int) {
+    m.Beliefs = make(Beliefs, total)
+    m.pBounce = 0.5
+    m.pChurn = math.Min(1., 2./float64(total))
 }
 
 // Method Prior resets the model to the prior beliefs.
