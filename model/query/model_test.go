@@ -14,7 +14,7 @@ func TestNewModel(t *testing.T) {
     }
 }
 
-func TestObserve(t *testing.T) {
+func TestModelObserve(t *testing.T) {
     for _, c := range []struct {
         total, count int
         logp float64
