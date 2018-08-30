@@ -1,4 +1,4 @@
-// Command scan runs over pps sequence (stored as a CSV file, last called is the pps)
+// Command scan runs over pps sequence (stored as a CSV file, last column is the pps)
 // and computes updated beliefs after each session. The output is enumerated CSV, where
 // each line is a flattened Beliefs vector.
 package main
@@ -47,13 +47,13 @@ func makeRecord(iline int, m *model.Model, floatFmt string) []string {
 }
 
 func main() {
-	bandwidth := flag.Float64("bandwidth", 100.,
+	bandwidth := flag.Float64("bandwidth", 1000.,
 		"bandwidth of prior belief")
 	total := flag.Int("total", 10,
 		"total page count")
 	thin := flag.Int("thin", 100,
 		"beliefs are output once per 'thin' rows")
-	floatFmt := flag.String("floatFmt", "%.3f",
+	floatFmt := flag.String("floatFmt", "%.3g",
 		"format for floats in the output CSV file")
 	flag.Parse()
 
@@ -68,7 +68,7 @@ func main() {
 	// Go through the CSV data
 	rdr := csv.NewReader(os.Stdin)
 	wtr := csv.NewWriter(os.Stdout)
-	wtr.Flush()
+	defer wtr.Flush()
 
 	// assume pps is the last column
 	rdr.Read() // skip the header
