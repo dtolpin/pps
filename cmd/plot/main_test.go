@@ -44,7 +44,7 @@ func TestPagePChurnErr(t *testing.T) {
 			}
 			if !offmean {
 				t.Errorf("some points must deviate from the mean, but got "+
-					"mean = %.4g, page = %v",
+					"mean = %.3g, page = %v",
 					c.m, page)
 			}
 		}
@@ -57,7 +57,7 @@ func TestPpsMeanErr(t *testing.T) {
 	}{{0., 1.}, {2., 0.}, {2., 3.}} {
 		marker := ppsMeanErr(c.m, c.s)
 		if marker[len(marker)/2].X != c.m {
-			t.Errorf("the midpoint must be at the mean %.4g, but got %.4g",
+			t.Errorf("the midpoint must be at the mean %.3g, but got %.3g",
 				c.m, marker[len(marker)/2].X)
 		}
 		for i := 1; i < len(marker); i++ {

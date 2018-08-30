@@ -31,7 +31,7 @@ func TestNewModel(t *testing.T) {
 			for i := 0; i != c.total; i++ {
 				for j := 0; j != 2; j++ {
 					if m.Beliefs[i][j] != c.beliefs[i][j] {
-						t.Errorf("wrong belief (%d, %d): got %.6g, want %.6g",
+						t.Errorf("wrong belief (%d, %d): got %.3g, want %.3g",
 							i, j, m.Beliefs[i][j], c.beliefs[i][j])
 					}
 				}
@@ -50,7 +50,7 @@ func TestNewModel(t *testing.T) {
 		// check that the average length is half total
 		if c.total > 1 && math.Abs(2./m.pChurn-float64(c.total)) > 0.5 {
 			t.Errorf("average length must be half total, but got: "+
-				"total=%d, average=%.6g",
+				"total=%d, average=%.3g",
 				c.total, 1./m.pChurn)
 		}
 	}
@@ -62,13 +62,13 @@ func TestPrior(t *testing.T) {
 		m.Prior()
 		pBounce := m.Beliefs[0][0] / (m.Beliefs[0][0] + m.Beliefs[0][1])
 		if math.Abs(pBounce-m.pBounce) > epsilon {
-			t.Errorf("wrong prior bounce probability: got %.6g, wanted %.6g",
+			t.Errorf("wrong prior bounce probability: got %.3g, wanted %.3g",
 				pBounce, m.pBounce)
 		}
 		for _, belief := range m.Beliefs[1:] {
 			pChurn := belief[0] / (belief[0] + belief[1])
 			if math.Abs(pChurn-m.pChurn) > epsilon {
-				t.Errorf("wrong prior churn probability: got %.6g, wanted %.6g",
+				t.Errorf("wrong prior churn probability: got %.3g, wanted %.3g",
 					pChurn, m.pChurn)
 			}
 		}

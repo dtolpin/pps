@@ -26,7 +26,7 @@ func TestModelObserve(t *testing.T) {
 		m.Prior()
 		logp := m.Observe(c.count)
 		if math.Abs(logp-c.logp) > epsilon {
-			t.Errorf("wrong logp for total=%d, count=%d: got %.4g want %.4g",
+			t.Errorf("wrong logp for total=%d, count=%d: got %.3g want %.3g",
 				c.total, c.count, logp, c.logp)
 		}
 	}

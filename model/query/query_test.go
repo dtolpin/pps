@@ -22,8 +22,8 @@ func TestQueryObserve(t *testing.T) {
 		q := NewQuery(c.total, c.bandwidth, c.counts)
 		logp := q.Observe(bandwidth)
 		if math.Abs(logp-c.logp) > epsilon {
-			t.Errorf("wrong logp for total=%d, bandwidth=%.4g, counts=%v: "+
-				"got %.4g want %.4g",
+			t.Errorf("wrong logp for total=%d, bandwidth=%.3g, counts=%v: "+
+				"got %.3g want %.3g",
 				c.total, c.bandwidth, c.counts, logp, c.logp)
 		}
 	}

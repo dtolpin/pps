@@ -19,11 +19,11 @@ func TestBeta(t *testing.T) {
 		mean := dist.Mean()
 		variance := dist.Variance()
 		if math.Abs(mean-c.mean) > epsilon {
-			t.Errorf("wrong mean of %v: got %.6g, want %v",
+			t.Errorf("wrong mean of %v: got %.3g, want %v",
 				&dist, mean, c.mean)
 		}
 		if math.Abs(variance-c.variance) > epsilon {
-			t.Errorf("wrong variance of %v: got %.6g, want %v",
+			t.Errorf("wrong variance of %v: got %.3g, want %v",
 				&dist, variance, c.variance)
 		}
 	}
