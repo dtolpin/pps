@@ -18,8 +18,8 @@ import (
 func readData(rdr *csv.Reader, from, till int) []int {
 	rdr.Read() // skip the header
 
-    counts := make([]int, till - from)
-	for iline := 1; ; iline++ {
+    counts := make([]int, 0, till - from)
+	for iline := 0; iline != till; iline++ {
 		record, err := rdr.Read()
 		if err == io.EOF {
 			break
@@ -28,15 +28,37 @@ func readData(rdr *csv.Reader, from, till int) []int {
 			log.Fatal(err)
 		}
 
-		pps, err := strconv.Atoi(record[len(record)-1])
-        counts = append(counts, pps)
-		if err != nil {
-			log.Printf("line %d: illegal pps %v, skipping",
-				iline, record)
-			continue
-		}
+        if(iline >= from) {
+            pps, err := strconv.Atoi(record[len(record)-1])
+            if err != nil {
+                log.Printf("line %d: illegal pps %v, skipping",
+                    iline, record)
+                continue
+            }
+            counts = append(counts, pps)
+        }
 	}
     return counts
+}
+
+// Function inferBandwidth invokes approximate inference to infer
+// the bandwidth. Returns mean and variance of the bandwidth.
+func inferBandwidth(total int, bandwidth float64, counts []int, 
+                    walk float64, N int) (mean, std float64) {
+    query := query.NewQuery(total, bandwidth, counts)
+    proposal := infer.RandomWalk(walk)
+    samples := make(chan float64)
+    go infer.MH(query, proposal, bandwidth, samples)
+    sum := 0.
+    sum2 := 0.
+    for i := 0; i != N; i++ {
+        x := <- samples
+        sum += x
+        sum2 += x * x
+    }
+    mean = sum / float64(N)
+    std = math.Sqrt(sum2 / float64(N) - mean * mean)
+    return mean, std
 }
 
 func main() {
@@ -64,18 +86,7 @@ func main() {
     counts := readData(csv.NewReader(os.Stdin), *from, *till)
 
     // Infer the bandwidth
-    query := query.NewQuery(*total, *bandwidth, counts)
-    proposal := infer.RandomWalk(*walk)
-    samples := make(chan float64)
-    go infer.MH(query, proposal, *bandwidth, samples)
-    sum := 0.
-    sum2 := 0.
-    for i := 0; i != *N; i++ {
-        x := <- samples
-        sum += x
-        sum2 += x * x
-    }
-    mean := sum / float64(*N)
-    std := math.Sqrt(sum2 / float64(*N) - mean * mean)
+    mean, std := inferBandwidth(*total, *bandwidth, counts,
+                                *walk, *N)
     fmt.Printf("Bandwidth: %.3g ± %.3g\n", mean, *Z * std)
 }
