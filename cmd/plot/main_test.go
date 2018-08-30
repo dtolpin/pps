@@ -56,15 +56,15 @@ func TestPpsMeanErr(t *testing.T) {
 		m, s float64
 	}{{0., 1.}, {2., 0.}, {2., 3.}} {
 		marker := ppsMeanErr(c.m, c.s)
-        if marker[len(marker) / 2].X != c.m {
-            t.Errorf("the midpoint must be at the mean %.4g, but got %.4g",
-                c.m, marker[len(marker) / 2].X)
-        }
-        for i := 1; i < len(marker); i++ {
-            if marker[i].X < marker[i - 1].X {
-                t.Errorf("X coordinates must be ordered, but go %#v", 
-                    marker)
-            }
-        }
-    }
+		if marker[len(marker)/2].X != c.m {
+			t.Errorf("the midpoint must be at the mean %.4g, but got %.4g",
+				c.m, marker[len(marker)/2].X)
+		}
+		for i := 1; i < len(marker); i++ {
+			if marker[i].X < marker[i-1].X {
+				t.Errorf("X coordinates must be ordered, but go %#v",
+					marker)
+			}
+		}
+	}
 }
