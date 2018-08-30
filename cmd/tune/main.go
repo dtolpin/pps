@@ -4,8 +4,8 @@ package main
 import (
 	"encoding/csv"
 	"flag"
-	"fmt"
 	"io"
+    "fmt"
 	"log"
 	"os"
 	"strconv"
@@ -15,37 +15,10 @@ import (
 	"bitbucket.org/dtolpin/pps/infer"
 )
 
-func main() {
-	bandwidth := flag.Float64("bandwidth", 1000.,
-		"initial bandwidth")
-    walk := flag.Float64("walk", 100., "standard deviation of random walk")
-	total := flag.Int("total", 10,
-		"total page count")
-	from := flag.Int("from", 0,
-		"first row of the tuning set")
-    till := flag.Int("till", -1,
-        "first row after the tuning set")
-    N := flag.Int("N", 1000, "number of MH samples")
-	flag.Parse()
-
-	if flag.NArg() > 0 {
-		log.Fatalf("unexpected position arguments: %v", flag.Args())
-	}
-
-	// Create and initialize the model
-	m := query.NewModel(*total)
-	m.Prior()
-
-	// Read the data
-	rdr := csv.NewReader(os.Stdin)
-	// assume pps is the last column
+func readData(rdr *csv.Reader, from, till int) []int {
 	rdr.Read() // skip the header
-	// run through sessions
-    count := *till - *from
-    if count < 0 {
-        count = int(*bandwidth)
-    }
-    counts := make([]int, count)
+
+    counts := make([]int, till - from)
 	for iline := 1; ; iline++ {
 		record, err := rdr.Read()
 		if err == io.EOF {
@@ -63,7 +36,34 @@ func main() {
 			continue
 		}
 	}
+    return counts
+}
 
+func main() {
+	bandwidth := flag.Float64("bandwidth", 1000.,
+		"initial bandwidth")
+    walk := flag.Float64("walk", 100., "standard deviation of random walk")
+	total := flag.Int("total", 10,
+		"total page count")
+	from := flag.Int("from", 0,
+		"first row of the tuning set")
+    till := flag.Int("till", -1,
+        "first row after the tuning set")
+    N := flag.Int("N", 1000, "number of MH samples")
+    Z := flag.Float64("Z", 2., "Z score for confidence range in output")
+	flag.Parse()
+    if *till < *from {
+        *till = *from + int(*bandwidth)
+    }
+
+	if flag.NArg() > 0 {
+		log.Fatalf("unexpected position arguments: %v", flag.Args())
+	}
+
+    // Read the PPS data
+    counts := readData(csv.NewReader(os.Stdin), *from, *till)
+
+    // Infer the bandwidth
     query := query.NewQuery(*total, *bandwidth, counts)
     proposal := infer.RandomWalk(*walk)
     samples := make(chan float64)
@@ -77,6 +77,5 @@ func main() {
     }
     mean := sum / float64(*N)
     std := math.Sqrt(sum2 / float64(*N) - mean * mean)
-    fmt.Printf("bandwidth: %v,%v\n", mean, std)
-    log.Printf("bandwidth: %v,%v\n", mean, std)
+    fmt.Printf("Bandwidth: %.3g ± %.3g\n", mean, *Z * std)
 }
