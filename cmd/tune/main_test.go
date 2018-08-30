@@ -39,8 +39,4 @@ func TestReadData(t *testing.T) {
 }
 
 func TestInferBandwidth(t *testing.T) {
-    for c := range []struct{
-    }{
-    } {
-    }
 }
