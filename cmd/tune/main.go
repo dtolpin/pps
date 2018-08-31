@@ -53,8 +53,8 @@ func init() {
 		"first row after the tuning set")
 	flag.IntVar(&N, "N", N, "number of MH samples")
 	flag.Float64Var(&Z, "Z", Z, "Z score for confidence range in output")
-    flag.StringVar(&PLOT, "plot", PLOT, "file to store the plot")
-    flag.IntVar(&DPI, "dpi", DPI, "DPI of the plot")
+	flag.StringVar(&PLOT, "plot", PLOT, "file to store the plot")
+	flag.IntVar(&DPI, "dpi", DPI, "DPI of the plot")
 }
 
 func readData(rdr *csv.Reader, from, till int) []int {
@@ -85,13 +85,13 @@ func readData(rdr *csv.Reader, from, till int) []int {
 
 // Function drawBandwidth draws the inferred bandwidth as a histogram.
 func drawBandwidth(dist []float64, mean, std float64) {
-    p, err := plot.New()
-    if err != nil {
-        log.Panic(err)
-    }
+	p, err := plot.New()
+	if err != nil {
+		log.Panic(err)
+	}
 
-    p.Title.Text = fmt.Sprintf("Bandwidth: %.0f ± %.0f", mean, Z*std)
-    p.X.Label.Text = "bandwidth"
+	p.Title.Text = fmt.Sprintf("Bandwidth: %.0f ± %.0f", mean, Z*std)
+	p.X.Label.Text = "bandwidth"
 	h, err := plotter.NewHist(plotter.Values(dist), 16)
 	if err != nil {
 		panic(err)
@@ -126,14 +126,14 @@ func inferBandwidth(total int, bandwidth float64, counts []int,
 	go infer.MH(query, proposal, bandwidth, samples)
 	sum := 0.
 	sum2 := 0.
-    dist := make([]float64, N)
+	dist := make([]float64, N)
 
-    // Burn
-    for i := 0; i != N; i++ {
-        <-samples
-    }
-    
-    // Collect after burn-in
+	// Burn
+	for i := 0; i != N; i++ {
+		<-samples
+	}
+
+	// Collect after burn-in
 	for i := 0; i != N; i++ {
 		dist[i] = <-samples
 		sum += dist[i]
@@ -142,18 +142,18 @@ func inferBandwidth(total int, bandwidth float64, counts []int,
 	mean = sum / float64(N)
 	std = math.Sqrt(sum2/float64(N) - mean*mean)
 
-    if PLOT != "" {
-        drawBandwidth(dist, mean, std)
-    }
+	if PLOT != "" {
+		drawBandwidth(dist, mean, std)
+	}
 
 	return mean, std
 }
 
 func main() {
 	flag.Parse()
-    if TILL == -1 {
-        TILL = math.MaxInt32
-    }
+	if TILL == -1 {
+		TILL = math.MaxInt32
+	}
 
 	if flag.NArg() > 0 {
 		log.Fatalf("unexpected position arguments: %v", flag.Args())
