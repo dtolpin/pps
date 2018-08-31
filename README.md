@@ -21,3 +21,7 @@ Run `make` on a Unix-like system to generate animated GIF.
 
 Build and run `tune` on a file from `data/` to infer the bandwidth 
 for each campaign.
+
+# License
+
+See the LICENSE file.
