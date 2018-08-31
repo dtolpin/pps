@@ -1,4 +1,4 @@
-all: plots/ASTBT.gif plots/JLNVT2.gif plots/SELVPNS.gif plots/FAKE-30.gif
+all: plots/ASTBT.gif plots/JLNVT2.gif plots/SELVPNS.gif plots/FAKE-30.gif plots/FAKE-1000.gif
 
 TOTAL=30
 BANDWIDTH=1000
@@ -51,4 +51,3 @@ clean:
 
 distclean: clean
 	rm -f plot scan plots/*.gif
-

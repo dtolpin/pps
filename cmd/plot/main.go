@@ -57,7 +57,7 @@ func parseRecord(record []string) (title string, marker plotter.XYs, pages plott
 	if err != nil {
 		log.Panic(err)
 	}
-	title = fmt.Sprintf("PPS = %.3g ± %.3g", mean, Z*std)
+	title = fmt.Sprintf("PPS = %.2f ± %.2f", mean, Z*std)
 	marker = ppsMeanErr(mean, std)
 
 	// per-page churn beliefs
@@ -140,7 +140,7 @@ func main() {
 			}
 
 			title, marker, pages := parseRecord(record)
-			p.Title.Text = fmt.Sprintf("Session %v: %v", iline, title)
+			p.Title.Text = fmt.Sprintf("Session % 5d: %v", iline, title)
 			p.X.Label.Text = "Page#"
 			plotutil.AddLines(p,
 				"P(churn)", pages,
