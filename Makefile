@@ -1,4 +1,4 @@
-all: plots/ASTBT.gif plots/JLNVT2.gif plots/SELVPNS.gif
+all: plots/ASTBT.gif plots/JLNVT2.gif plots/SELVPNS.gif plots/FAKE-30.gif
 
 TOTAL=30
 BANDWIDTH=1000
@@ -26,7 +26,13 @@ GOS=\
 	./infer/infer_test.go
 
 pps-%.csv: data/%.csv scan
-	./scan -total $(TOTAL) -bandwidth `./tune -bandwidth $(BANDWIDTH) -thin $(THIN) < $< | head -$(HEAD) > $@
+	./scan -total $(TOTAL) -bandwidth $(BANDWIDTH) -thin $(THIN) < $< | head -$(HEAD) > $@
+
+pps-FAKE-30.csv: data/FAKE.csv scan
+	./scan -total 10 -bandwidth 30 -thin $(THIN) < $< | head -$(HEAD) > $@
+
+pps-FAKE-1000.csv: data/FAKE.csv scan
+	./scan -total 10 -bandwidth 1000 -thin $(THIN) < $< | head -$(HEAD) > $@
 
 plots/%.gif: pps-%.csv plot
 	./plot < $<
