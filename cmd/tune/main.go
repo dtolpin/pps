@@ -13,6 +13,14 @@ import (
 	"strconv"
 	"time"
 
+	"image"
+	"image/gif"
+
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg/draw"
+	"gonum.org/v1/plot/vg/vgimg"
+
 	"bitbucket.org/dtolpin/pps/infer"
 	"bitbucket.org/dtolpin/pps/model/query"
 )
@@ -20,6 +28,33 @@ import (
 // Be random.
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+// The command line
+var BANDWIDTH float64 = 1000
+var WALK float64 = 10
+var TOTAL int = 20
+var FROM int = 0
+var TILL int = -1
+var N int = 1000
+var Z float64 = 2
+var PLOT string = ""
+var DPI int = 120
+
+func init() {
+	flag.Float64Var(&BANDWIDTH, "bandwidth", BANDWIDTH,
+		"initial bandwidth")
+	flag.Float64Var(&WALK, "walk", WALK, "standard deviation of random walk")
+	flag.IntVar(&TOTAL, "total", TOTAL,
+		"total page count")
+	flag.IntVar(&FROM, "from", FROM,
+		"first row of the tuning set")
+	flag.IntVar(&TILL, "till", TILL,
+		"first row after the tuning set")
+	flag.IntVar(&N, "N", N, "number of MH samples")
+	flag.Float64Var(&Z, "Z", Z, "Z score for confidence range in output")
+    flag.StringVar(&PLOT, "plot", PLOT, "file to store the plot")
+    flag.IntVar(&DPI, "dpi", DPI, "DPI of the plot")
 }
 
 func readData(rdr *csv.Reader, from, till int) []int {
@@ -48,6 +83,39 @@ func readData(rdr *csv.Reader, from, till int) []int {
 	return counts
 }
 
+// Function drawBandwidth draws the inferred bandwidth as a histogram.
+func drawBandwidth(dist []float64, mean, std float64) {
+    p, err := plot.New()
+    if err != nil {
+        log.Panic(err)
+    }
+
+    p.Title.Text = fmt.Sprintf("Bandwidth: %.0f ± %.0f", mean, Z*std)
+    p.X.Label.Text = "bandwidth"
+	h, err := plotter.NewHist(plotter.Values(dist), 16)
+	if err != nil {
+		panic(err)
+	}
+	// Normalize the area under the histogram to
+	// sum to one.
+	h.Normalize(1)
+	p.Add(h)
+
+	img := image.NewRGBA(image.Rect(0, 0, 7*DPI, 3*DPI))
+	c := vgimg.NewWith(vgimg.UseImage(img))
+	p.Draw(draw.New(c))
+
+	f, err := os.Create(PLOT)
+	defer f.Close()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	if err := gif.Encode(f, img, nil); err != nil {
+		log.Panic(err)
+	}
+}
+
 // Function inferBandwidth invokes approximate inference to infer
 // the bandwidth. Returns mean and variance of the bandwidth.
 func inferBandwidth(total int, bandwidth float64, counts []int,
@@ -58,42 +126,44 @@ func inferBandwidth(total int, bandwidth float64, counts []int,
 	go infer.MH(query, proposal, bandwidth, samples)
 	sum := 0.
 	sum2 := 0.
+    dist := make([]float64, N)
+
+    // Burn
+    for i := 0; i != N; i++ {
+        <-samples
+    }
+    
+    // Collect after burn-in
 	for i := 0; i != N; i++ {
-		x := <-samples
-		sum += x
-		sum2 += x * x
+		dist[i] = <-samples
+		sum += dist[i]
+		sum2 += dist[i] * dist[i]
 	}
 	mean = sum / float64(N)
 	std = math.Sqrt(sum2/float64(N) - mean*mean)
+
+    if PLOT != "" {
+        drawBandwidth(dist, mean, std)
+    }
+
 	return mean, std
 }
 
 func main() {
-	bandwidth := flag.Float64("bandwidth", 1000.,
-		"initial bandwidth")
-	walk := flag.Float64("walk", 100., "standard deviation of random walk")
-	total := flag.Int("total", 10,
-		"total page count")
-	from := flag.Int("from", 0,
-		"first row of the tuning set")
-	till := flag.Int("till", -1,
-		"first row after the tuning set")
-	N := flag.Int("N", 1000, "number of MH samples")
-	Z := flag.Float64("Z", 2., "Z score for confidence range in output")
 	flag.Parse()
-	if *till == -1 {
-		*till = math.MaxInt32
-	}
+    if TILL == -1 {
+        TILL = math.MaxInt32
+    }
 
 	if flag.NArg() > 0 {
 		log.Fatalf("unexpected position arguments: %v", flag.Args())
 	}
 
 	// Read the PPS data
-	counts := readData(csv.NewReader(os.Stdin), *from, *till)
+	counts := readData(csv.NewReader(os.Stdin), FROM, TILL)
 
 	// Infer the bandwidth
-	mean, std := inferBandwidth(*total, *bandwidth, counts,
-		*walk, *N)
-	fmt.Printf("Bandwidth: %.0f ± %.0f\n", mean, *Z*std)
+	mean, std := inferBandwidth(TOTAL, BANDWIDTH, counts,
+		WALK, N)
+	fmt.Printf("Bandwidth: %.0f ± %.0f\n", mean, Z*std)
 }
