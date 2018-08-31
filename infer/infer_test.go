@@ -1,8 +1,8 @@
 package infer
 
 import (
+	"math"
 	"testing"
-    "math"
 )
 
 // In the tests below I mix pointer and value receivers intentionally
@@ -63,54 +63,54 @@ func TestMHAccepts(t *testing.T) {
 }
 
 func TestMHRejects(t *testing.T) {
-    samples := make(chan float64)
-    query := IdentityQuery{}
-    proposal := IncProposal(-1.)
-    const N = 100 // should be enough to reject at least once
-    go MH(query, proposal, float64(N), samples)
-    var x float64
-    for i := 0; i != N; i++ {
-        x = <- samples
-    }
-    if x < 0. {
-        t.Errorf("Last sample must be at least 0, but got %v", x)
-    }
-    if x < 1. {
-        t.Errorf("At least one sample must be rejected for %T, %T(%v)",
-            query, proposal, float64(proposal))
-    }
+	samples := make(chan float64)
+	query := IdentityQuery{}
+	proposal := IncProposal(-1.)
+	const N = 100 // should be enough to reject at least once
+	go MH(query, proposal, float64(N), samples)
+	var x float64
+	for i := 0; i != N; i++ {
+		x = <-samples
+	}
+	if x < 0. {
+		t.Errorf("Last sample must be at least 0, but got %v", x)
+	}
+	if x < 1. {
+		t.Errorf("At least one sample must be rejected for %T, %T(%v)",
+			query, proposal, float64(proposal))
+	}
 }
 
 func TestRandomWalk(t *testing.T) {
-    // Leave room for approximation
-    const N = int(1E6)
-    epsilon := math.Sqrt(1 / float64(N)) * 10.
+	// Leave room for approximation
+	const N = int(1E6)
+	epsilon := math.Sqrt(1/float64(N)) * 10.
 
-    for _, c := range []struct{
-        mean float64
-        std float64
-    }{
-        {1., 1.},
-        {-1., 2.},
-        {0., 0.5},
-    } {
-        proposal := RandomWalk(c.std)
-        sum := 0.
-        sum2 := 0.
-        for i := 0; i != N; i++ {
-            x := proposal.Propose(c.mean)
-            sum += x
-            sum2 += x * x
-        }
-        mean := sum / float64(N)
-        std := math.Sqrt(sum2  / float64(N) -  mean * mean)
-        if math.Abs((mean - c.mean)/c.std) > epsilon {
-            t.Errorf("Wrong mean in RandomWalk(%.3g, %.3g): got %.3g, want %.3g",
-                c.mean, c.std, mean, c.mean)
-        }
-        if math.Abs((std - c.std)/c.std) > epsilon {
-            t.Errorf("Wrong std in RandomWalk(%.3g, %.3g): got %.3g, want %.3g",
-                c.mean, c.std, std, c.std)
-        }
-    }
+	for _, c := range []struct {
+		mean float64
+		std  float64
+	}{
+		{1., 1.},
+		{-1., 2.},
+		{0., 0.5},
+	} {
+		proposal := RandomWalk(c.std)
+		sum := 0.
+		sum2 := 0.
+		for i := 0; i != N; i++ {
+			x := proposal.Propose(c.mean)
+			sum += x
+			sum2 += x * x
+		}
+		mean := sum / float64(N)
+		std := math.Sqrt(sum2/float64(N) - mean*mean)
+		if math.Abs((mean-c.mean)/c.std) > epsilon {
+			t.Errorf("Wrong mean in RandomWalk(%.3g, %.3g): got %.3g, want %.3g",
+				c.mean, c.std, mean, c.mean)
+		}
+		if math.Abs((std-c.std)/c.std) > epsilon {
+			t.Errorf("Wrong std in RandomWalk(%.3g, %.3g): got %.3g, want %.3g",
+				c.mean, c.std, std, c.std)
+		}
+	}
 }
