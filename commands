@@ -17,9 +17,9 @@ go install bitbucket.org/dtolpin/pps
 
 # Run
 
-cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'Athletes Spouses TBT - Mobile USA OB - PPS.csv' | head -101 > pps.csv )
-cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'John Life  NVT2 - Tablet USA OB - PPS.csv' | head -101 > pps.csv )
-cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'Sam Elliott Life VPNS - Desktop USA OB - PPS.csv' | head -101 > pps.csv )
+cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'ASTBT.csv' | head -101 > pps.csv )
+cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'JLNVT2.csv' | head -101 > pps.csv )
+cd ~/go/src/bitbucket.org/dtolpin/pps; ( ./scan -total 20 -bandwidth 1000 -thin 20 < ~/Work/crunchmind/data/campaign-pps/'SELVPNS.csv' | head -101 > pps.csv )
 
 cd ~/go/src/bitbucket.org/dtolpin/pps; rm -f plots/*.gif; ./plot -pattern plots/pps-%06v.gif < pps.csv
 cd ~/go/src/bitbucket.org/dtolpin/pps; convert -delay 25 -loop 1 plots/pps-*.gif pps.gif
