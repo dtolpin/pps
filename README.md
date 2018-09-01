@@ -16,6 +16,8 @@ study on page-per-session forecasting.
 
 ## Usage
 
+Go 1.11 is required because this package uses [Go Modules](https://github.com/golang/go/wiki/Modules).
+
 You will need `convert` from `imagemagick` in the path.
 Run `make` on a Unix-like system to generate animated GIF.
 
